@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Google Translate Clone (Full Paragraph)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="bg-white shadow-lg rounded-2xl p-6 w-full max-w-3xl">
+    <h1 class="text-2xl font-bold text-center mb-4">🌍 Google Translate Clone</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Input -->
+      <div>
+        <textarea id="inputText" rows="6" placeholder="Enter text..." class="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-400"></textarea>
+      </div>
+      <!-- Output -->
+      <div>
+        <div id="outputBox" class="w-full p-3 border rounded-md bg-gray-50 min-h-[150px]">
+          <p id="translatedText" class="text-gray-800 whitespace-pre-line"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-between items-center mt-4">
+      <select id="targetLang" class="border px-3 py-2 rounded-md focus:ring-2 focus:ring-blue-400">
+        <option value="hi">Hindi</option>
+        <option value="en">English</option>
+        <option value="fr">French</option>
+        <option value="es">Spanish</option>
+        <option value="de">German</option>
+        <option value="ja">Japanese</option>
+        <option value="ar">Arabic</option>
+        <option value="zh">Chinese</option>
+        <option value="ru">Russian</option>
+      </select>
+
+      <button id="translateBtn" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">
+        Translate
+      </button>
+    </div>
+
+    <div class="text-right mt-3">
+      <button id="copyBtn" class="text-sm text-blue-600 hover:underline hidden">Copy Translated Text</button>
+    </div>
+  </div>
+
+  <script>
+    const translateBtn = document.getElementById("translateBtn");
+    const inputText = document.getElementById("inputText");
+    const translatedText = document.getElementById("translatedText");
+    const targetLang = document.getElementById("targetLang");
+    const copyBtn = document.getElementById("copyBtn");
+
+    translateBtn.addEventListener("click", async () => {
+      const text = inputText.value.trim();
+      const lang = targetLang.value;
+
+      if (!text) {
+        alert("Please enter text!");
+        return;
+      }
+
+      translatedText.textContent = "Translating...";
+      copyBtn.classList.add("hidden");
+
+      try {
+        const res = await fetch(
+          `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${lang}&dt=t&q=${encodeURIComponent(text)}`
+        );
+        const data = await res.json();
+
+        // Join all translation chunks together (for full paragraph)
+        const translation = data[0].map(item => item[0]).join("");
+
+        translatedText.textContent = translation;
+        copyBtn.classList.remove("hidden");
+      } catch (err) {
+        translatedText.textContent = "⚠️ Translation failed. Please try again.";
+      }
+    });
+
+    copyBtn.addEventListener("click", () => {
+      navigator.clipboard.writeText(translatedText.textContent);
+      copyBtn.textContent = "Copied!";
+      setTimeout(() => (copyBtn.textContent = "Copy Translated Text"), 1500);
+    });
+  </script>
+</body>
+</html>
